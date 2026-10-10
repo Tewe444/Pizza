@@ -79,7 +79,6 @@
         <h1 class="text-4xl md:text-6xl text-red-500 mb-8 text-center leading-relaxed">PIZZARIA<br></h1>
         <p class="text-xs md:text-sm text-gray-300 mb-8 max-w-xl text-center leading-loose">
             Klicke auf Kundenbestellungen (ohne Item in der Hand), um das Rezept zu sehen!<br>
-
         </p>
         <button id="start-btn" class="pixel-btn bg-green-500 text-xl px-8 py-4 text-white">SPIELEN</button>
     </div>
@@ -745,6 +744,15 @@
                 else if (type.includes('diavola')) pizzaType = 'diavola';
                 else if (type.startsWith('counter_pizza_')) pizzaType = type.replace('counter_pizza_', '');
 
+                // PRÜFUNG: Nur gebackene Pizzen aus dem Ofen oder vom Abstellplatz zulassen!
+                const isBaked = sourceZone.includes('oven') || sourceZone.includes('counter-slot');
+
+                if (!isBaked) {
+                    showMessage("Die Pizza muss zuerst gebacken werden!");
+                    cancelDrag();
+                    return;
+                }
+
                 if (custDiv && pizzaType) {
                     serveCustomer(custDiv.dataset.id, pizzaType, e.clientX, e.clientY);
                     if (sourceZone.includes('oven')) {
@@ -1095,7 +1103,6 @@
             const existingIds = Array.from(cCont.children).map(el => el.dataset.id);
             const stateIds = state.customers.map(c => c.id);
 
-            // Nur neu rendern, wenn sich die Anzahl/Kunden geändert haben
             if (JSON.stringify(existingIds) !== JSON.stringify(stateIds)) {
                 let cHtml = '';
                 state.customers.forEach(c => {
@@ -1116,7 +1123,6 @@
                 cCont.innerHTML = cHtml;
             }
 
-            // Fortschrittsbalken smooth aktualisieren
             state.customers.forEach(c => {
                 const bar = document.getElementById(`pbar-${c.id}`);
                 if (bar) {
